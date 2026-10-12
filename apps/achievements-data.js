@@ -1,0 +1,4 @@
+const achievements = {
+  tech: [],
+  social: [],
+};

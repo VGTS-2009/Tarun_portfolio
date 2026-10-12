@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings — Tarun OS</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="page">
+    <p class="page-kicker">CONTROL PANEL / DESKTOP</p>
+    <h1>Make it yours.</h1>
+    <p class="lead">Changes are saved on this device.</p>
+    <form id="settings-form">
+      <fieldset class="settings-group">
+        <legend>ICON ARRANGEMENT</legend>
+        <div class="settings-choices">
+          <label class="settings-choice"><input type="radio" name="layout" value="right"><span class="layout-preview layout-preview--right"><i></i><i></i><i></i></span>Right grid</label>
+          <label class="settings-choice"><input type="radio" name="layout" value="left"><span class="layout-preview layout-preview--left"><i></i><i></i><i></i></span>Left grid</label>
+          <label class="settings-choice"><input type="radio" name="layout" value="bottom"><span class="layout-preview layout-preview--bottom"><i></i><i></i><i></i></span>Bottom grid</label>
+        </div>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>DESKTOP COLOR</legend>
+        <div class="settings-choices">
+          <label class="settings-choice"><input type="radio" name="color" value="lagoon"><span class="color-swatch" style="--swatch:#087e82"></span>Lagoon</label>
+          <label class="settings-choice"><input type="radio" name="color" value="fern"><span class="color-swatch" style="--swatch:#47684f"></span>Fern</label>
+          <label class="settings-choice"><input type="radio" name="color" value="brick"><span class="color-swatch" style="--swatch:#8a4938"></span>Brick</label>
+          <label class="settings-choice"><input type="radio" name="color" value="slate"><span class="color-swatch" style="--swatch:#42596a"></span>Slate</label>
+          <label class="settings-choice"><input type="radio" name="color" value="olive"><span class="color-swatch" style="--swatch:#6b703c"></span>Olive</label>
+        </div>
+      </fieldset>
+      <fieldset class="settings-group">
+        <legend>DESKTOP PATTERN</legend>
+        <div class="settings-choices">
+          <label class="settings-choice"><input type="radio" name="pattern" value="grid"><span class="pattern-swatch pattern-swatch--grid"></span>Grid</label>
+          <label class="settings-choice"><input type="radio" name="pattern" value="dots"><span class="pattern-swatch pattern-swatch--dots"></span>Dots</label>
+          <label class="settings-choice"><input type="radio" name="pattern" value="scanlines"><span class="pattern-swatch pattern-swatch--scanlines"></span>Lines</label>
+          <label class="settings-choice"><input type="radio" name="pattern" value="checks"><span class="pattern-swatch pattern-swatch--checks"></span>Checks</label>
+          <label class="settings-choice"><input type="radio" name="pattern" value="plain"><span class="pattern-swatch"></span>Plain</label>
+        </div>
+      </fieldset>
+      <p class="settings-status" id="settings-status" aria-live="polite">Ready</p>
+    </form>
+  </main>
+  <script>
+    const form = document.querySelector('#settings-form');
+    const status = document.querySelector('#settings-status');
+    let current = { color: 'lagoon', pattern: 'grid', layout: 'right' };
+
+    function showSettings(settings) {
+      current = { ...current, ...settings };
+      for (const [name, value] of Object.entries(current)) {
+        const input = form.querySelector(`input[name="${name}"][value="${value}"]`);
+        if (input) input.checked = true;
+      }
+    }
+
+    form.addEventListener('change', () => {
+      current = Object.fromEntries(new FormData(form));
+      window.parent.postMessage({ type: 'settings-change', settings: current }, '*');
+      status.textContent = 'Saving on this device…';
+    });
+
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'settings-init') showSettings(event.data.settings);
+      if (event.data?.type === 'settings-saved') status.textContent = 'Saved on this device.';
+    });
+    window.parent.postMessage({ type: 'settings-ready' }, '*');
+  </script>
+</body>
+</html>
